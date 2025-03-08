@@ -1,12 +1,15 @@
-from transformers import BertModel, BertTokenizer
+from transformers import AutoModel, AutoTokenizer
 import xml.etree.ElementTree as ET
 import numpy as np
 from models  import *
+from transformers import pipeline
+
+pipe = pipeline("feature-extraction", model="DeepPavlov/rubert-base-cased-sentence")
 
 device = torch.device('cpu')
 
-bert = BertModel.from_pretrained('rubert-base-cased-sentence')
-tokenizer = BertTokenizer.from_pretrained('rubert-base-cased-sentence')
+bert = AutoModel.from_pretrained('DeepPavlov/rubert-base-cased-sentence')
+tokenizer = AutoTokenizer.from_pretrained('DeepPavlov/rubert-base-cased-sentence')
 
 multiclass = BERT_based(bert)
 multiclass.load_state_dict(torch.load("pretrained/multiclass.pt"))

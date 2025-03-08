@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
@@ -11,9 +13,11 @@ from file_utils import *
 from utils import *
 from buttons import *
 
+load_dotenv()
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logging.getLogger('httpx').setLevel(logging.WARNING)
-TOKEN = "8167879602:AAHzHPS_nyUOKq2-PCdbtJI4YmpBW-qT1Qo"
+TOKEN = os.getenv("TOKEN")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # chat_id = update.message.chat_id
