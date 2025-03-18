@@ -9,7 +9,7 @@ class BERT_based(nn.Module):
         self.dropout = nn.Dropout(0.1)
         self.relu = nn.ReLU()
         self.fc1 = nn.Linear(768,512)
-        self.fc2 = nn.Linear(512,5)
+        self.fc2 = nn.Linear(512,12)
         self.softmax = nn.LogSoftmax(dim = 1)
 
     def forward(self, sent_id, mask):
@@ -22,7 +22,7 @@ class BERT_based(nn.Module):
         return x
         
 class Autoencoder(nn.Module):
-    def __init__(self, input_dim, hidden_dim=256):
+    def __init__(self, input_dim, hidden_dim=128):
         super(Autoencoder, self).__init__()
         self.encoder = nn.LSTM(input_dim, hidden_dim, batch_first=True)
         self.decoder = nn.LSTM(hidden_dim, input_dim, batch_first=True)

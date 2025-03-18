@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
@@ -11,9 +13,11 @@ from file_utils import *
 from utils import *
 from buttons import *
 
+load_dotenv()
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logging.getLogger('httpx').setLevel(logging.WARNING)
-TOKEN = "8167879602:AAHzHPS_nyUOKq2-PCdbtJI4YmpBW-qT1Qo"
+TOKEN = os.getenv("TOKEN")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # chat_id = update.message.chat_id
@@ -48,27 +52,25 @@ if __name__ == '__main__':
     #menu |
     
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("menu", main_menu)],
+        entry_points=[CommandHandler("menu", main_menu.handle)],
         states={
             START_ROUTES: [
-                CallbackQueryHandler(menu, pattern="^" + str(MENU) + "$"),
-                CallbackQueryHandler(main_menu, pattern="^" + str(MAIN_MENU) + "$"),
-                CallbackQueryHandler(info, pattern="^" + str(INFO) + "$"),
-                CallbackQueryHandler(a1, pattern="^" + str(A1) + "$"),
-                CallbackQueryHandler(a2, pattern="^" + str(A2) + "$"),
-                CallbackQueryHandler(a3, pattern="^" + str(A3) + "$"),
-                CallbackQueryHandler(a4, pattern="^" + str(A4) + "$"),
-                CallbackQueryHandler(a5, pattern="^" + str(A5) + "$"),
-                CallbackQueryHandler(getflbtn, pattern="^" + str(GETFLBTN) + "$")
-                
-            ],
-            # END_ROUTES: [
-            #     CallbackQueryHandler(main_menu, pattern="^" + str(ONE) + "$"),
-            # ],
+                CallbackQueryHandler(main_menu.handle, pattern=f"^{MAIN_MENU}$"),
+                CallbackQueryHandler(vkr_menu.handle, pattern=f"^{VKR_MENU}$"),
+                CallbackQueryHandler(gia_menu.handle, pattern=f"^{GIA_MENU}$"),
+                CallbackQueryHandler(info.handle, pattern=f"^{INFO}$"),
+                CallbackQueryHandler(dates.handle, pattern=f"^{DATES}$"),
+                CallbackQueryHandler(contacts.handle, pattern=f"^{CONTACTS}$"),
+                CallbackQueryHandler(v5fl.handle, pattern=f"^{V5FL}$"),
+                CallbackQueryHandler(v6fl.handle, pattern=f"^{V6FL}$"),
+            ] + [
+                CallbackQueryHandler(btn.handle, pattern=f"^{key}$") for key, btn in vkr_buttons.items()
+            ] + [
+                CallbackQueryHandler(btn.handle, pattern=f"^{key}$") for key, btn in gia_buttons.items()
+            ]
         },
-        fallbacks=[CommandHandler("menu", main_menu)],
+        fallbacks=[CommandHandler("menu", main_menu.handle)],
     )
-    
 
     application.add_handler(start_handler)
     application.add_handler(question_handler)
