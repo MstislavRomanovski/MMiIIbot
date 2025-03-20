@@ -42,7 +42,7 @@ def get_embedding(text):
     sentence_embedding = last_hidden_state.mean(dim=1).squeeze().cpu().numpy()
     return sentence_embedding
 
-def detect_anomalies(model, data, threshold=0.1971):
+def detect_anomalies(model, data, threshold=0.2004):
     with torch.no_grad():
         reconstructed = model(data)
         reconstructed = reconstructed.squeeze(0) 

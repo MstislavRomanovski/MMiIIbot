@@ -26,8 +26,8 @@ def download_weights():
                 f.write(chunk)
                 bar.update(len(chunk))
 
-    links = ["https://www.dropbox.com/scl/fi/etdxrg7hgewsikgih1pn0/multiclass.pt?rlkey=9dsja3vop2it9382ndh01fixp&st=temnsvb4&dl=0",
-    "https://www.dropbox.com/scl/fi/u41kb03z5b2tbdlxhk37k/oneclass.pt?rlkey=yh03d0n11z6hmsiz02nyczjj9&st=nv8rm6m3&dl=0"]
+    links = ["https://www.dropbox.com/scl/fi/csb0yosh5lqsoovm8deoo/multiclass.pt?rlkey=hjoc6xzrqxjk6avtbzehx4e9f&st=gb5fej6b&dl=0",
+    "https://www.dropbox.com/scl/fi/3ahysn9cz6p10z1wd017u/oneclass.pt?rlkey=9ri1r5yffeplse137nb5aoqnz&st=t1u28vun&dl=0"]
     links = [link.replace("www.dropbox.com", "dl.dropboxusercontent.com").replace("&dl=0","") for link in links]
     
     save_dir = os.path.join(DIR,"pretrained")

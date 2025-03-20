@@ -46,10 +46,10 @@ class BasicButton:
 main_menu = BasicButton(
     keyboard=[
         [InlineKeyboardButton("ВКР", callback_data=str(VKR_MENU)),
-         InlineKeyboardButton("ГИА", callback_data=str(GIA_MENU)),
-         InlineKeyboardButton("Даты", callback_data=str(DATES)),
-         InlineKeyboardButton("Контакты", callback_data=str(CONTACTS)),
-         InlineKeyboardButton("Команды", callback_data=str(INFO))]
+         InlineKeyboardButton("ГИА", callback_data=str(GIA_MENU)),],
+        [InlineKeyboardButton("Даты", callback_data=str(DATES)),
+         InlineKeyboardButton("Контакты", callback_data=str(CONTACTS)),],
+        [InlineKeyboardButton("Команды", callback_data=str(INFO)),]
     ],
     answer="Выберите:",
     ismenu=True
@@ -60,7 +60,7 @@ vkr_menu = BasicButton(
         [InlineKeyboardButton("О ВКР", callback_data=str(V1)),
          InlineKeyboardButton("Общие Требования", callback_data=str(V2))],
         [InlineKeyboardButton("Согласование ВКР", callback_data=str(V3)),
-         InlineKeyboardButton("Проверка на оригинальность", callback_data=str(V4))],
+         InlineKeyboardButton("Проверка на плагиат", callback_data=str(V4))],
         [InlineKeyboardButton("Оформление ВКР", callback_data=str(V5)),
          InlineKeyboardButton("Документы", callback_data=str(V6))],
         [InlineKeyboardButton("Апробация ВКР", callback_data=str(V7)),],
@@ -151,12 +151,12 @@ gia_buttons = {
 v5fl = BasicButton(
     keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(VKR_MENU))]],
     answer=get_answer(4),
-    senddir=DIR+"/documents/1"
+    senddir=DIR+"/documents/4"
 )
 
 v6fl = BasicButton(
     keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(VKR_MENU))]],
     answer=get_answer(5),
-    senddir=DIR+"/documents/2"
+    senddir=DIR+"/documents/5"
 )
 

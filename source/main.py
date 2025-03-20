@@ -33,13 +33,17 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                                                           f"/menu - менюшка"))
 
 async def question(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_arg = " ".join(context.args)
+    #user_arg = " ".join(context.args)
+    message = update.message or update.edited_message
+    if not message or not message.text:
+        return
+    user_arg = message.text
     index = classify_text(user_arg)
     answer = get_answer(index)
     #await context.bot.send_message(chat_id=update.effective_chat.id, text=str(index))
-    if index == 5:
+    if index in (4,5):
         await context.bot.send_message(chat_id=update.effective_chat.id, text=answer)
-        await send_all(update, context)
+        await send_all(update, context,senddir=DIR+f"/documents/{index}")
     else:
         await context.bot.send_message(chat_id=update.effective_chat.id, text=answer)
 
@@ -47,7 +51,7 @@ if __name__ == '__main__':
     application = ApplicationBuilder().token(TOKEN).build()
     
     start_handler = CommandHandler('start', start)
-    question_handler = CommandHandler('q', question)
+    question_handler = MessageHandler(filters.TEXT & (~filters.COMMAND), question)
     help_handler = CommandHandler('help', help)
     #menu |
     
