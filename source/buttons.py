@@ -1,157 +1,161 @@
 import logging
+from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ( 
     filters, ApplicationBuilder,
     ContextTypes, CommandHandler,
     MessageHandler,Application,
-    CallbackQueryHandler,CommandHandler,
-    ContextTypes,ConversationHandler,)
+    CallbackQueryHandler,ConversationHandler,)
 from utils import get_answer
 from file_utils import *
 
-# cant return to main menu from menu
-# need to replace numbers with question groups
-# and subgroups to answers with end..
-
+load_dotenv()
+DIR = os.getenv("DIR")
 
 logger = logging.getLogger(__name__)
-START_ROUTES, END_ROUTES = range(2)
-MAIN_MENU, MENU, INFO, A1, A2, A3, A4, A5, GETFLBTN = range(9)
+START_ROUTES = range(1)
+MAIN_MENU, DATES, CONTACTS , INFO, GIA_MENU, VKR_MENU ,V1, V2, V3, V4, V5, V6, V7, G1, G2, G3, G4, V5FL, V6FL = range(19)
 
-async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    keyboard = [
-        [
-            InlineKeyboardButton("Вопросы", callback_data=str(MENU)),
-            InlineKeyboardButton("Команды", callback_data=str(INFO)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    if update.message:  
-        await update.message.reply_text("Выберите:", reply_markup=reply_markup)
-    elif update.callback_query:  
-        query = update.callback_query
-        await query.answer()
-        await query.edit_message_text("Выберите:", reply_markup=reply_markup)
-    return START_ROUTES
-
-async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.answer()
-    await delete_bot_messages(context, update.effective_chat.id)
-    keyboard = [
-        [
-            InlineKeyboardButton("О кафедре", callback_data=str(A1)),
-            InlineKeyboardButton("Программы обучения", callback_data=str(A2)),]
-        ,[
-            InlineKeyboardButton("Дисциплины", callback_data=str(A3)),
-            InlineKeyboardButton("Контакты", callback_data=str(A4)),]
-        ,[
-            InlineKeyboardButton("ВКР", callback_data=str(A5))
-        ,]
-        ,[
-            InlineKeyboardButton("Вернуться", callback_data=str(MAIN_MENU))
-        ,]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(
-        text="Выберите интересующий вас вопрос:", reply_markup=reply_markup
-    )
-    return START_ROUTES
-
-async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    answer = (f'В данной версии бота доступны следующие команды:\n'
-              f'/help - справка о командах\n'
-              f'/q - задать вопрос в текстовом виде\n'
-              f'/menu - меню с вопросами\n')
-    keyboard = [[InlineKeyboardButton("Вернуться", callback_data=str(MAIN_MENU)),],]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(text=answer,reply_markup=reply_markup)
-    return START_ROUTES
-
-
-async def a1(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    answer = get_answer(1)
-    keyboard = [
-
-            InlineKeyboardButton("Вернуться", callback_data=str(MENU)), ],
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(
-        text=answer, reply_markup=reply_markup
-    )
-    return START_ROUTES
-
-
-async def a2(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    answer =  get_answer(2)
-    keyboard = [
-
-        InlineKeyboardButton("Вернуться", callback_data=str(MENU)), ], 
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(
-        text=answer, reply_markup=reply_markup
-    )
-    return START_ROUTES
-
-
-async def a3(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    answer =  get_answer(3)
-    keyboard = [
-
-        InlineKeyboardButton("Вернуться", callback_data=str(MENU)), ],  
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(
-        text=answer, reply_markup=reply_markup
-    )
-    return START_ROUTES
-
-
-async def a4(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    answer = get_answer(4)
-    keyboard = [
-
-        InlineKeyboardButton("Вернуться", callback_data=str(MENU)), ],  
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(
-        text=answer, reply_markup=reply_markup
-    )
-    return START_ROUTES
-
-async def a5(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    answer =  get_answer(5)
-    keyboard = [
-
-        [InlineKeyboardButton("Вернуться", callback_data=str(MENU)), 
-        InlineKeyboardButton("Получить файлы", callback_data=str(GETFLBTN)),],]  # menu
-
-    # return query.edit_message_text(text=answer)
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(
-        text=answer, reply_markup=reply_markup
-    )
-    return START_ROUTES
-    
-async def getflbtn(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    answer =  get_answer(5)
-    keyboard = [[
-        InlineKeyboardButton("Вернуться", callback_data=str(MENU)),],]
+class BasicButton:
+    def __init__(self, keyboard, answer, ismenu = False, senddir=None):
+        self.keyboard = keyboard
+        self.answer = answer
+        self.ismenu = ismenu
+        self.senddir = senddir
         
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    sent_messages = await send_all(update, context)
-    context.user_data.setdefault("bot_messages", []).extend(sent_messages)
-    await query.edit_message_text(
-        text=answer, reply_markup=reply_markup
+    async def handle(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        query = update.callback_query
+        reply_markup = InlineKeyboardMarkup(self.keyboard)
+
+        if  query: 
+            await query.answer()
+            if self.ismenu:
+                await delete_bot_messages(context, update.effective_chat.id)
+
+            if self.senddir:
+                sent_messages = await send_all(update, context, self.senddir)
+                context.user_data.setdefault("bot_messages", []).extend(sent_messages)
+
+            await query.edit_message_text(text=self.answer, reply_markup=reply_markup)
+        elif update.message: 
+            await update.message.reply_text(text=self.answer, reply_markup=reply_markup)
+
+        return START_ROUTES
+
+main_menu = BasicButton(
+    keyboard=[
+        [InlineKeyboardButton("ВКР", callback_data=str(VKR_MENU)),
+         InlineKeyboardButton("ГИА", callback_data=str(GIA_MENU)),],
+        [InlineKeyboardButton("Даты", callback_data=str(DATES)),
+         InlineKeyboardButton("Контакты", callback_data=str(CONTACTS)),],
+        [InlineKeyboardButton("Команды", callback_data=str(INFO)),]
+    ],
+    answer="Выберите:",
+    ismenu=True
+)
+
+vkr_menu = BasicButton(
+    keyboard=[
+        [InlineKeyboardButton("О ВКР", callback_data=str(V1)),
+         InlineKeyboardButton("Общие Требования", callback_data=str(V2))],
+        [InlineKeyboardButton("Согласование ВКР", callback_data=str(V3)),
+         InlineKeyboardButton("Проверка на плагиат", callback_data=str(V4))],
+        [InlineKeyboardButton("Оформление ВКР", callback_data=str(V5)),
+         InlineKeyboardButton("Документы", callback_data=str(V6))],
+        [InlineKeyboardButton("Апробация ВКР", callback_data=str(V7)),],
+        [InlineKeyboardButton("Вернуться", callback_data=str(MAIN_MENU))]
+    ],
+    answer="Это раздел посвященный ВКР, выберите интересующий вас вопрос:",
+    ismenu=True
+)
+
+gia_menu = BasicButton(
+    keyboard=[
+        [InlineKeyboardButton("Допуск к ГИА", callback_data=str(G1)),],
+        [InlineKeyboardButton("Тестирование ГОС", callback_data=str(G2)),],
+        [InlineKeyboardButton("Формат ГОС", callback_data=str(G3)),],
+        [InlineKeyboardButton("Вернуться", callback_data=str(MAIN_MENU))]
+    ],
+    answer="Это раздел посвященный ГИА и ГОС, выберите интересующий вас вопрос:",
+    ismenu=True
+)
+
+info = BasicButton(
+    keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(MAIN_MENU))]],
+    answer="В данной версии бота доступны следующие команды:\n"
+           "/help - справка о командах\n"
+           "/q - задать вопрос в текстовом виде\n"
+           "/menu - меню с вопросами"
+)
+
+dates = BasicButton(
+        keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(MAIN_MENU))]],
+        answer=get_answer(12)
+)
+
+contacts = BasicButton(
+        keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(MAIN_MENU))]],
+        answer=get_answer(8)
+)
+
+# Вопросы ВКР
+vkr_buttons = {
+    V1: BasicButton(
+        keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(VKR_MENU))]],
+        answer=get_answer(7)
+    ),
+    V2: BasicButton(
+        keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(VKR_MENU))]],
+        answer=get_answer(1)
+    ),
+    V3: BasicButton(
+        keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(VKR_MENU))]],
+        answer=get_answer(2)
+    ),
+    V4: BasicButton(
+        keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(VKR_MENU))]],
+        answer=get_answer(3)
+    ),
+    V5: BasicButton(
+        keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(VKR_MENU)),
+                   InlineKeyboardButton("Получить файлы", callback_data=str(V5FL))]],
+        answer=get_answer(4)
+    ),
+    V6: BasicButton(
+        keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(VKR_MENU)),
+                   InlineKeyboardButton("Получить файлы", callback_data=str(V6FL))]],
+        answer=get_answer(5)
+    ),
+    V7: BasicButton(
+        keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(VKR_MENU))]],
+        answer=get_answer(6)
     )
-    return START_ROUTES
+}
+
+gia_buttons = {
+    G1: BasicButton(
+        keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(GIA_MENU))]],
+        answer=get_answer(9)  # Получаем ответ по индексу для ГИА
+    ),
+    G2: BasicButton(
+        keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(GIA_MENU))]],
+        answer=get_answer(10)
+    ),
+    G3: BasicButton(
+        keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(GIA_MENU))]],
+        answer=get_answer(11)
+    ),
+}
+
+v5fl = BasicButton(
+    keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(VKR_MENU))]],
+    answer=get_answer(4),
+    senddir=DIR+"/documents/4"
+)
+
+v6fl = BasicButton(
+    keyboard=[[InlineKeyboardButton("Вернуться", callback_data=str(VKR_MENU))]],
+    answer=get_answer(5),
+    senddir=DIR+"/documents/5"
+)
 
