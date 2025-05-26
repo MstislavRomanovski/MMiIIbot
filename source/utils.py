@@ -19,7 +19,7 @@ tokenizer = AutoTokenizer.from_pretrained('DeepPavlov/rubert-base-cased-sentence
 download_weights()
 
 multiclass = BERT_based(bert)
-multiclass.load_state_dict(torch.load(DIR+"/pretrained/multiclass.pt", weights_only=True))
+multiclass.load_state_dict(torch.load(DIR+"/pretrained/multiclass.pt", weights_only=True,map_location=torch.device('cpu')))
 multiclass.to(device)
 multiclass.eval()
 
